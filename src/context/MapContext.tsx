@@ -1,31 +1,41 @@
 import React, { createContext, useContext, useState } from "react";
-import { defaultMap } from "../constants/defaultMap"; // Import defaultMap from constants
+import { defaultMap } from "../constants/defaultMap";
+import { MapController } from "../controllers/MapController";
 
 // Define the types of map state
-interface MapState {
-  style: string; // Base map style URL
-  center: [number, number]; // Map center [longitude, latitude]
-  zoom: number; // Zoom level
-  layers: string[]; // Layers to display on the map
-  permissions: boolean; // Map interaction permissions (e.g., can move/zoom)
+export interface MapState {
+  style: string;
+  center: [number, number];
+  zoom: number;
+  layers: string[];
+  permissions: boolean;
 }
 
-// Create the context with default values
-const MapContext = createContext<[MapState, React.Dispatch<React.SetStateAction<MapState>>]>([
-  defaultMap,
-  () => {},
-]);
+// Define the full context type
+type MapContextType = {
+  mapState: MapState;
+  mapController: MapController;
+};
 
-// The MapProvider accepts children as React nodes
+// Create the context
+const MapContext = createContext<MapContextType | undefined>(undefined);
+
 export const MapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mapState, setMapState] = useState<MapState>(defaultMap); // Use defaultMap as initial state
+  const [mapState, setMapState] = useState<MapState>(defaultMap);
+  const mapController = new MapController(setMapState); // Instantiate controller
 
   return (
-    <MapContext.Provider value={[mapState, setMapState]}>
+    <MapContext.Provider value={{ mapState, mapController }}>
       {children}
     </MapContext.Provider>
   );
 };
 
 // Custom hook to use the MapContext
-export const useMapState = () => useContext(MapContext);
+export const useMapState = (): MapContextType => {
+  const context = useContext(MapContext);
+  if (!context) {
+    throw new Error("useMapState must be used within a MapProvider");
+  }
+  return context;
+};
