@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import maplibregl from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useMapState } from "../context/MapContext";
+import { useMapState } from "../context/MapContext"; // Import context hook
+import FindMeButton from "./FindMeButton"; // Import the FindMeButton component
 
 const Map: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -20,7 +21,12 @@ const Map: React.FC = () => {
     return () => map.remove(); // Cleanup on unmount
   }, [mapState]); // Reinitialize the map whenever mapState changes
 
-  return <div ref={mapContainerRef} style={{ width: "100vw", height: "100vh"}} />;
+  return (
+    <div ref={mapContainerRef} style={{ width: "100vw", height: "100vh", position: "relative" }}>
+      {/* FindMeButton will be displayed above the map */}
+      <FindMeButton />
+    </div>
+  );
 };
 
 export default Map;

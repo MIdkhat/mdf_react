@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import { defaultMap } from "../constants/defaultMap"; // Import the defaultMap from constants
+import { defaultMap } from "../constants/defaultMap"; // Import defaultMap from constants
 
 // Define the types of map state
 interface MapState {
@@ -16,6 +16,7 @@ const MapContext = createContext<[MapState, React.Dispatch<React.SetStateAction<
   () => {},
 ]);
 
+// The MapProvider accepts children as React nodes
 export const MapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mapState, setMapState] = useState<MapState>(defaultMap); // Use defaultMap as initial state
 
