@@ -4,7 +4,7 @@ import { defaultMap } from "../constants/defaultMap"; // Import the defaultMap f
 // Define the types of map state
 interface MapState {
   style: string; // Base map style URL
-  center: number[]; // Map center [longitude, latitude]
+  center: [number, number]; // Map center [longitude, latitude]
   zoom: number; // Zoom level
   layers: string[]; // Layers to display on the map
   permissions: boolean; // Map interaction permissions (e.g., can move/zoom)
