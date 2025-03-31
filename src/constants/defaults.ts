@@ -76,4 +76,5 @@ export const defaultMap: MapState = {
   permissions: true,
   searchCenter: MelbourneCoords,
   searchRadius: searchRadiusOptions[0],
+  isPopupOpen: false,
 };

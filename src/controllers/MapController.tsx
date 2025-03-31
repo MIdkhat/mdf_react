@@ -18,6 +18,10 @@ export class MapController {
     this.mapState = mapState
   }
 
+  updateMapState = (newState: MapState) => {
+    this.mapState = newState;
+  }
+
   get map(): maplibregl.Map | null {
     return this.mapRef.current
   }
@@ -169,6 +173,13 @@ export class MapController {
 
         return layer
       }),
+    }))
+  }
+
+  handleInfoModal = (isPopupOpen: boolean) => {
+    this.setMapState((prevState: MapState) => ({
+      ...prevState,
+      isPopupOpen: isPopupOpen
     }))
   }
 }

@@ -47,7 +47,7 @@ const RightTopMenu: React.FC = () => {
     }
   }, [searchOpen])
 
-  const handleFindMe = () => {
+  const handleFindMeClick = () => {
     console.log("Find Me")
     mapController.handleFindMe()
   }
@@ -57,22 +57,22 @@ const RightTopMenu: React.FC = () => {
     // mapController.handleParksVic
   }
 
-  const handleCouncils = () => {
+  const handleCouncilsClick = () => {
     console.log("Councils")
     // mapController.handleCouncils
   }
 
-  const handleDroneSpot = () => {
+  const handleDroneSpotClick = () => {
     console.log("Drone Spot")
     // mapController.handleDroneSpot
   }
-
-  const handleInfo = () => {
+  const handleInfoClick = () => {
     console.log("info")
-    // mapController.handleDroneSpot
+    mapController.handleInfoModal((prevState: MapState) => !prevState.isPopupOpen)
   }
 
-  const handleSearch = () => {
+
+  const handleSearchClick = () => {
     console.log("search")
     setSearchOpen(!searchOpen)
     // mapController.handleDroneSpot
@@ -116,13 +116,13 @@ const RightTopMenu: React.FC = () => {
               css={css`
                 z-index: 3;
               `}
-              onClick={handleSearch}
+              onClick={handleSearchClick}
             />
           </div>
           {/* <IconButton icon={<ParksVicIcon size={40} color="#000" />} onClick={handleParksVic} /> */}
-          <IconButton icon={<CouncilsIcon size={40} color="#000" />} sticky={true} onClick={handleCouncils} />
-          <IconButton icon={<DroneSpotIcon size={40} color="#000" />} sticky={true} onClick={handleDroneSpot} />
-          <IconButton icon={<FindMeIcon size={40} color="#000" />} onClick={handleFindMe} />
+          <IconButton icon={<CouncilsIcon size={40} color="#000" />} sticky={true} onClick={handleCouncilsClick} />
+          <IconButton icon={<DroneSpotIcon size={40} color="#000" />} sticky={true} onClick={handleDroneSpotClick} />
+          <IconButton icon={<FindMeIcon size={40} color="#000" />} onClick={handleFindMeClick} />
 
           {/* <div ref={radiusRef} css={searchContainer}>
             <input type="text" css={[searchInput, radiusOpen && searchInputVisible]} placeholder="Radius..." />
@@ -150,7 +150,7 @@ const RightTopMenu: React.FC = () => {
             />
           </div>
 
-          <IconButton icon={<InfoIcon size={40} color="#000" />} onClick={handleInfo} />
+          <IconButton icon={<InfoIcon size={40} color="#000" />} onClick={handleInfoClick} />
         </div>
       )}
     </div>
@@ -173,18 +173,15 @@ const menuContainer = css`
   align-items: center; /* Centers items vertically */
   gap: 10px;
 `
-
 const openStyle = css`
   width: auto;
   height: auto;
 `
-
 const closedStyle = css`
   width: 50px;
   height: 40px;
   overflow: hidden;
 `
-
 const toggleButton = css`
   width: 100%;
   background: lightgray;
@@ -205,7 +202,6 @@ const menuContent = css`
   gap: 8px;
   margin-top: 10px;
 `
-
 const inputContainer = css`
   position: relative;
   display: flex;
@@ -213,7 +209,6 @@ const inputContainer = css`
   justify-content: center;
   width: 50px; /* Initially, only the button is visible */
 `
-
 const searchInput = css`
   position: absolute;
   z-index: 1
@@ -227,7 +222,6 @@ const searchInput = css`
   transition: width 0.3s ease, opacity 0.3s ease;
   border-radius: 5px;
 `
-
 const searchInputVisible = css`
   width: 200px;
   opacity: 1;
@@ -235,7 +229,6 @@ const searchInputVisible = css`
   background: white;
   border: 1px solid #ccc;
 `
-
 const dropdownInput = css`
   position: absolute;
   right: 0;

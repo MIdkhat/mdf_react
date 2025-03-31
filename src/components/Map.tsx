@@ -3,6 +3,7 @@ import * as maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { useMapState } from "../context/MapContext"
 import RightTopMenu from "./RightTopMenu"
+import InfoModal from "./InfoPopup"
 
 const Map: React.FC = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
@@ -49,10 +50,8 @@ const Map: React.FC = () => {
 
   return (
     <div ref={mapContainerRef} style={{ width: "100vw", height: "100vh", position: "relative" }}>
-      {/* {isMapReady && (
-          // render LAYERS
-      )} */}
       <RightTopMenu />
+      {mapState.isPopupOpen && <InfoModal />}
     </div>
   )
 }

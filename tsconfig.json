@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": ".", // This sets the base directory for relative paths
+    "paths": {
+      "@/*": ["src/*"]
+    },
     "target": "es5",
     "lib": ["dom", "es2015"],
     "moduleResolution": "node",
