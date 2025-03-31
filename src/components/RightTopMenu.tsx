@@ -78,10 +78,16 @@ const RightTopMenu: React.FC = () => {
     // mapController.handleDroneSpot
   }
 
-  const handleRadius = () => {
+  const handleRadiusClick = () => {
     console.log("radius")
     setRadiusOpen(!radiusOpen)
-    // mapController.handleRadiusChange
+    mapController.handleRadiusUpdate(searchRadius)
+  }
+
+  const handleRadiusChange = (radius: number) => {
+    console.log("radius change")
+    setSearchRadius(radius)
+    mapController.handleRadiusUpdate(radius)
   }
 
   return (
@@ -126,7 +132,7 @@ const RightTopMenu: React.FC = () => {
             <select
               css={[dropdownInput, radiusOpen && radiusInputVisible]}
               value={searchRadius}
-              onChange={(e) => setSearchRadius(Number(e.target.value))}
+              onChange={(e) => handleRadiusChange(Number(e.target.value))}
               disabled={!radiusOpen}
             >
               {searchRadiusOptions.map((radius) => (
@@ -140,7 +146,7 @@ const RightTopMenu: React.FC = () => {
               css={css`
                 z-index: 3;
               `}
-              onClick={handleRadius}
+              onClick={handleRadiusClick}
             />
           </div>
 

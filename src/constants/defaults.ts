@@ -1,7 +1,8 @@
 import { Layer, MapState } from "../context/MapContext";
+import { createCirclePolygon } from "../utils";
 
 const baseMaps = {
-  openStreet:  "https://raw.githubusercontent.com/go2garret/maps/main/src/assets/json/openStreetMap.json",
+  openStreet: "https://raw.githubusercontent.com/go2garret/maps/main/src/assets/json/openStreetMap.json",
 }
 
 const MelbourneCoords: [number, number] = [144.9631, -37.8136]
@@ -9,19 +10,23 @@ const MelbourneCoords: [number, number] = [144.9631, -37.8136]
 // src/constants/defaultMap.ts
 export const searchRadiusOptions = [5, 10, 50, 100]
 
-const createCirclePolygon = (center: [number, number], radius: number, points: number = 64) => {
-  const coords = [];
-  const angleStep = (2 * Math.PI) / points;
-
-  for (let i = 0; i < points; i++) {
-    const angle = i * angleStep;
-    const dx = radius * Math.cos(angle);
-    const dy = radius * Math.sin(angle);
-    coords.push([center[0] + dx, center[1] + dy]);
-  }
-
-  return coords;
+const defaultCStyles = {
+  searchCenter: {
+    "circle-radius": 4, // Scale value used here instead of 8
+    "circle-color": "#003366", // Fill color for the center marker (from 'fillColor')
+    "circle-stroke-width": 2,
+    "circle-stroke-color": "#003366", // Stroke color for visibility (from 'strokeColor')
+  },
+  searchArea: {
+    "fill-color": "#3399cc", // Fill color for the polygon (from 'fillColor')
+    "fill-opacity": 0.2, // Fill opacity (from 'fillOpacity')
+    "fill-outline-color": "#003366", // Outline color (from 'strokeColor')
+    // "stroke-color": "#003366", // Stroke color (from 'strokeColor')
+    // "stroke-opacity": 0.8, // Stroke opacity (from 'strokeOpacity')
+    // "stroke-width": 0.6, // Stroke width (from 'strokeWeight')
+  },
 };
+
 
 // Constants for layers
 const searchCenter: Layer = {
@@ -38,15 +43,10 @@ const searchCenter: Layer = {
       properties: {},
     },
   },
-  paint: {
-    "circle-radius": 8,
-    "circle-color": "#ff0000", // Red color for the center marker
-    "circle-stroke-width": 2,
-    "circle-stroke-color": "#ffffff", // White stroke for visibility
-  },
+  paint: defaultCStyles.searchCenter,
 };
 
-const searchRadius = searchRadiusOptions[0] * 1000; // Search radius in meters (5 km converted to meters)
+const searchRadius = searchRadiusOptions[0]; // Search radius in meters (5 km converted to meters)
 const searchArea: Layer = {
   id: "search-area",
   type: "geojson" as const,
@@ -61,10 +61,7 @@ const searchArea: Layer = {
       properties: {},
     },
   },
-  paint: {
-    "fill-color": "#ff0000", // Red color for the fill
-    "fill-outline-color": "#ff0000", // Outline color for the polygon
-  },
+  paint: defaultCStyles.searchArea,
 };
 
 // Example of layers stored as objects
@@ -74,7 +71,7 @@ export const defaultMap: MapState = {
   zoom: 12,
   layers: [
     searchCenter,
-    // searchArea,
+    searchArea,
   ],
   permissions: true,
   searchCenter: MelbourneCoords,

@@ -40,7 +40,7 @@ const MapContext = createContext<MapContextType | undefined>(undefined);
 export const MapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mapState, setMapState] = useState<MapState>(defaultMap);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const mapController = new MapController(setMapState, mapRef);
+  const mapController = new MapController(setMapState, mapRef, mapState);
 
   return (
     <MapContext.Provider value={{ mapRef, mapState, mapController }}>

@@ -1,21 +1,27 @@
 import * as maplibregl from "maplibre-gl"
-import { MapState } from "../context/MapContext"
-import { RefObject } from "react"
+import { MapState, useMapState } from "../context/MapContext"
 import { GeojsonLayer } from "../Layers/GeojsonLayer"
+import { createCirclePolygon } from "../utils"
 
 export class MapController {
   private setMapState: React.Dispatch<React.SetStateAction<MapState>>
-  private mapRef: RefObject<maplibregl.Map | null>
+  private mapRef: React.RefObject<maplibregl.Map | null>
+  private mapState: MapState
 
-  constructor(setMapState: React.Dispatch<React.SetStateAction<MapState>>, mapRef: RefObject<maplibregl.Map | null>) {
+  constructor(
+    setMapState: React.Dispatch<React.SetStateAction<MapState>>,
+    mapRef: React.RefObject<maplibregl.Map | null>,
+    mapState: MapState,
+  ) {
     this.setMapState = setMapState
     this.mapRef = mapRef
+    this.mapState = mapState
   }
 
   get map(): maplibregl.Map | null {
     return this.mapRef.current
   }
-  // Method to update an existing layer with new source and paint properties
+
   updateLayer = (layer: any, map: maplibregl.Map) => {
     const existingLayer = map.getLayer(layer.id)
 
@@ -35,7 +41,9 @@ export class MapController {
     // Update the paint properties if they exist
     if (layer.paint) {
       Object.keys(layer.paint).forEach((paintProperty) => {
+        // console.log(layer)
         const paintValue = layer.paint[paintProperty as keyof typeof layer.paint]
+        // console.log("paintProperty paintValue", paintProperty, paintValue)
         if (paintValue !== undefined) {
           map.setPaintProperty(layer.id, paintProperty, paintValue)
         }
@@ -105,39 +113,72 @@ export class MapController {
     }
   }
 
-  handleMapClick = (lngLat: maplibregl.LngLat) => {
-    console.log("Handling map click:", lngLat);
 
+  handleRadiusUpdate = (searchRadius: number) => {
+    console.log("Handling radius update:", searchRadius)
+    // Update the map state to change the search center and search area
     this.setMapState((prevState: MapState) => {
-      const updatedSearchCenter: [number, number] = [lngLat.lng, lngLat.lat];
-
-      // Make sure to return a new state object to trigger re-render
-      const updatedState = {
+      return {
         ...prevState,
-        searchCenter: updatedSearchCenter,
-        // It's important to trigger a re-render by updating the layers if necessary
-        layers: prevState.layers.map(layer => {
-          if (layer.id === 'search-center-marker') {
-            return {
-              ...layer,
-              source: {
-                ...layer.source,
-                data: {
-                  type: "Feature",
-                  geometry: {
-                    type: "Point",
-                    coordinates: updatedSearchCenter,
-                  },
-                  properties: {},
-                },
-              },
-            };
-          }
-          return layer;
-        }),
-      };
+        searchRadius,
+      }
+    })
 
-      return updatedState;
-    });
-  };
+    this.updateSearchArea(this.mapState.searchCenter, searchRadius)
+  }
+
+  handleMapClick = (lngLat: maplibregl.LngLat) => {
+    console.log("Handling map click:", lngLat)
+    const searchCenter: [number, number] = [lngLat.lng, lngLat.lat]
+    // Update the map state to change the search center and search area
+    this.setMapState((prevState: MapState) => {
+      return {
+        ...prevState,
+        searchCenter,
+      }
+    })
+
+    this.updateSearchArea(searchCenter, this.mapState.searchRadius)
+  }
+
+  updateSearchArea = (searchCenter: [number, number], searchRadius: number) => {
+    console.log("Updating search area with center:", searchCenter, "and radius:", searchRadius)
+
+    const searchAreaCoords = createCirclePolygon(searchCenter, searchRadius, 64)
+
+    this.setMapState((prevState: MapState) => ({
+      ...prevState,
+      layers: prevState.layers.map((layer) => {
+        if (layer.id === "search-center-marker") {
+          return {
+            ...layer,
+            source: {
+              ...layer.source,
+              data: {
+                type: "Feature" as const,
+                geometry: { type: "Point" as const, coordinates: searchCenter },
+                properties: {},
+              },
+            },
+          }
+        }
+
+        if (layer.id === "search-area") {
+          return {
+            ...layer,
+            source: {
+              ...layer.source,
+              data: {
+                type: "Feature" as const,
+                geometry: { type: "Polygon" as const, coordinates: [searchAreaCoords] },
+                properties: {},
+              },
+            },
+          }
+        }
+
+        return layer
+      }),
+    }))
+  }
 }
