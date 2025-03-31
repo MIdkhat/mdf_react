@@ -1,13 +1,51 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useMapState } from "../context/MapContext"
-import { CouncilsIcon, DroneSpotIcon, FindMeIcon, InfoIcon, ParksVicIcon, SearchIcon } from "./Icons"
-import IconButton from "./IconButton"
+import { ChevronDown, ChevronUp, CouncilsIcon, DroneSpotIcon, FindMeIcon, InfoIcon, ParksVicIcon, SearchIcon } from "./Icons"
+import { IconButton } from "./Buttons"
+import { searchRadiusOptions } from "../constants/defaults"
 
 const RightTopMenu: React.FC = () => {
   const { mapState, mapController } = useMapState()
   const [isOpen, setIsOpen] = useState(true)
+
+  const [searchOpen, setSearchOpen] = useState(false)
+  const searchRef = useRef<HTMLDivElement>(null)
+
+  const [radiusOpen, setRadiusOpen] = useState(false)
+  const radiusRef = useRef<HTMLDivElement>(null)
+
+  const [searchRadius, setSearchRadius] = useState(5)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      // Close the search dropdown if click is outside
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setSearchOpen(false)
+      }
+
+      // Close the radius dropdown if click is outside
+      if (radiusRef.current && !radiusRef.current.contains(event.target as Node)) {
+        setRadiusOpen(false)
+      }
+    }
+
+    // Add event listener when either search or radius dropdown is open
+    if (searchOpen || radiusOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [searchOpen, radiusOpen])
+
+  useEffect(() => {
+    if (searchOpen) {
+      setTimeout(() => searchRef.current?.querySelector("input")?.focus(), 100)
+    }
+  }, [searchOpen])
 
   const handleFindMe = () => {
     console.log("Find Me")
@@ -24,35 +62,88 @@ const RightTopMenu: React.FC = () => {
     // mapController.handleCouncils
   }
 
-    const handleDroneSpot = () => {
-        console.log("Drone Spot")
-        // mapController.handleDroneSpot
-    }
+  const handleDroneSpot = () => {
+    console.log("Drone Spot")
+    // mapController.handleDroneSpot
+  }
 
-    const handleInfo = () => {
-        console.log("info")
-        // mapController.handleDroneSpot
-    }
+  const handleInfo = () => {
+    console.log("info")
+    // mapController.handleDroneSpot
+  }
 
-    const handleSearch = () => {
-        console.log("info")
-        // mapController.handleDroneSpot
-    }
+  const handleSearch = () => {
+    console.log("search")
+    setSearchOpen(!searchOpen)
+    // mapController.handleDroneSpot
+  }
+
+  const handleRadius = () => {
+    console.log("radius")
+    setRadiusOpen(!radiusOpen)
+    // mapController.handleRadiusChange
+  }
 
   return (
     <div css={[menuContainer, isOpen ? openStyle : closedStyle]}>
-      <button onClick={() => setIsOpen(!isOpen)} css={toggleButton}>
+      {isOpen ? (
+        <IconButton icon={<ChevronUp size={40} color="#000" />} onClick={() => setIsOpen(!isOpen)} />
+      ) : (
+        <IconButton icon={<ChevronDown size={40} color="#000" />} onClick={() => setIsOpen(!isOpen)} />
+      )}
+
+      {/* <button onClick={() => setIsOpen(!isOpen)} css={toggleButton}>
         {isOpen ? "Hide" : "Open"}
-      </button>
+      </button> */}
 
       {isOpen && (
         <div css={menuContent}>
-
+          <div ref={searchRef} css={inputContainer}>
+            <input
+              type="text"
+              disabled={!searchOpen}
+              css={[searchInput, searchOpen && searchInputVisible]}
+              placeholder="Search..."
+            />
+            <IconButton
+              icon={<SearchIcon size={40} color="#000" />}
+              css={css`
+                z-index: 3;
+              `}
+              onClick={handleSearch}
+            />
+          </div>
           {/* <IconButton icon={<ParksVicIcon size={40} color="#000" />} onClick={handleParksVic} /> */}
-          <IconButton icon={<CouncilsIcon size={40} color="#000" />} onClick={handleCouncils} />
-          <IconButton icon={<DroneSpotIcon size={40} color="#000" />} onClick={handleDroneSpot} />
+          <IconButton icon={<CouncilsIcon size={40} color="#000" />} sticky={true} onClick={handleCouncils} />
+          <IconButton icon={<DroneSpotIcon size={40} color="#000" />} sticky={true} onClick={handleDroneSpot} />
           <IconButton icon={<FindMeIcon size={40} color="#000" />} onClick={handleFindMe} />
-          <IconButton icon={<SearchIcon size={40} color="#000" />} onClick={handleSearch} />
+
+          {/* <div ref={radiusRef} css={searchContainer}>
+            <input type="text" css={[searchInput, radiusOpen && searchInputVisible]} placeholder="Radius..." />
+            <IconButton label={`${searchRadius} km`} onClick={handleRadius} />
+          </div> */}
+          <div ref={radiusRef} css={inputContainer}>
+            <select
+              css={[dropdownInput, radiusOpen && radiusInputVisible]}
+              value={searchRadius}
+              onChange={(e) => setSearchRadius(Number(e.target.value))}
+              disabled={!radiusOpen}
+            >
+              {searchRadiusOptions.map((radius) => (
+                <option key={radius} value={radius}>
+                  {radius} km
+                </option>
+              ))}
+            </select>
+            <IconButton
+              label={`${searchRadius} km`}
+              css={css`
+                z-index: 3;
+              `}
+              onClick={handleRadius}
+            />
+          </div>
+
           <IconButton icon={<InfoIcon size={40} color="#000" />} onClick={handleInfo} />
         </div>
       )}
@@ -71,7 +162,10 @@ const menuContainer = css`
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
   padding: 10px;
   z-index: 1000;
-  transition: width 0.3s ease, height 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers items vertically */
+  gap: 10px;
 `
 
 const openStyle = css`
@@ -98,10 +192,72 @@ const toggleButton = css`
     color: white;
   }
 `
-
 const menuContent = css`
   display: flex;
   flex-direction: column;
+  align-items: center; /* Ensure all buttons, including search, are centered */
   gap: 8px;
   margin-top: 10px;
+`
+
+const inputContainer = css`
+  position: relative;
+  display: flex;
+  align-items: center; /* Ensures vertical alignment */
+  justify-content: center;
+  width: 50px; /* Initially, only the button is visible */
+`
+
+const searchInput = css`
+  position: absolute;
+  z-index: 1
+  right: 0;
+  height: 50px;
+  width: 0;
+  opacity: 0;
+  border: none;
+  padding: 0 10px;
+  font-size: 16px;
+  transition: width 0.3s ease, opacity 0.3s ease;
+  border-radius: 5px;
+`
+
+const searchInputVisible = css`
+  width: 200px;
+  opacity: 1;
+  right: 65px; /* Push left of button */
+  background: white;
+  border: 1px solid #ccc;
+`
+
+const dropdownInput = css`
+  position: absolute;
+  right: 0;
+  height: 50px;
+  width: 0;
+  opacity: 0;
+  border: none;
+  padding: 0 10px;
+  font-size: 16px;
+  transition: width 0.3s ease, opacity 0.3s ease;
+  border-radius: 5px;
+`
+const radiusInputVisible = css`
+  width: 200px;
+  opacity: 1;
+  right: 65px; /* Push left of button */
+  background: white;
+  border: 1px solid #ccc;
+  padding-right: 30px; /* Adjust this for spacing */
+  appearance: none; /* Removes default styling */
+  //   /* Custom Chevron style */
+  //   &::after {
+  //     content: "▼"; /* Use a Unicode character for the chevron */
+  //     position: absolute;
+  //     right: 10px; /* Position it to the right of the input */
+  //     top: 50%;
+  //     transform: translateY(-50%); /* Center vertically */
+  //     font-size: 20px; /* Adjust the size here */
+  //     color: red; /* Chevron color */
+  //   }
 `

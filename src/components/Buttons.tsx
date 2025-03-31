@@ -5,27 +5,31 @@ import { useState } from "react"
 
 interface IconButtonProps {
   onClick: () => void
-  icon: ReactNode
+  icon?: ReactNode
+  label?: string
   className?: string
   size?: number
   color?: string
   css?: any
+  sticky?: boolean
   active?: boolean
 }
 
-const IconButton: React.FC<IconButtonProps> = ({
+export const IconButton: React.FC<IconButtonProps> = ({
   onClick,
   icon,
+  label,
   className,
   size = 40,
   color = "white",
   css,
+  sticky = false,
   active = false,
 }) => {
   const [isActive, setIsActive] = useState(active)
 
   const handleClick = () => {
-    setIsActive((prev) => !prev)
+    if (sticky )setIsActive((prev) => !prev)
     onClick()
   }
 
@@ -38,26 +42,29 @@ const IconButton: React.FC<IconButtonProps> = ({
         css,
       ]}
     >
-      {icon}
+      {label ? <span css={labelStyle}>{label}</span> : icon}
     </button>
   )
 }
-
-export default IconButton
 
 // Default button styles
 const buttonBaseStyle = (size: number, color: string) => css`
   width: ${size}px;
   height: ${size}px;
+  padding: 2px;
   background-color: ${color};
   border: 1ps solid gray;
   border-radius: 5px;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 
   &:hover {
     background-color: rgb(165, 204, 246);
   }
+`
+const labelStyle = css`
+  font-size: 16px;
+  color: black;
 `
