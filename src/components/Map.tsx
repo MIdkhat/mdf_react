@@ -26,7 +26,7 @@ const Map: React.FC = () => {
 
     map.on("load", () => {
       console.log("Map loaded")
-      setIsMapReady(true) // ✅ Trigger re-render when map is ready
+      setIsMapReady(true)
     })
 
     map.on("click", (event) => {
@@ -44,12 +44,12 @@ const Map: React.FC = () => {
 
   useEffect(() => {
     if (isMapReady) {
-      mapController.loadLayers(); // Load layers when map is ready
+      mapController.loadLayers();
     }
   }, [isMapReady, mapController]);
 
   return (
-    <div ref={mapContainerRef} style={{ width: "100vw", height: "100vh", position: "relative" }}>
+    <div ref={mapContainerRef} style={{ width: "100vw", height: "100vh", position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
       <RightTopMenu />
       {mapState.isPopupOpen && <InfoModal />}
     </div>

@@ -2,12 +2,22 @@
 import { css } from "@emotion/react"
 import { useEffect, useRef, useState } from "react"
 import { useMapState } from "../context/MapContext"
-import { ChevronDown, ChevronUp, CouncilsIcon, DroneSpotIcon, FindMeIcon, InfoIcon, ParksVicIcon, SearchIcon } from "./Icons"
+import {
+  ChevronDown,
+  ChevronUp,
+  CouncilsIcon,
+  DroneSpotIcon,
+  FindMeIcon,
+  InfoIcon,
+  SearchIcon,
+} from "./Icons"
 import { IconButton } from "./Buttons"
 import { searchRadiusOptions } from "../constants/defaults"
 
 const RightTopMenu: React.FC = () => {
   const { mapState, mapController } = useMapState()
+  const { isPopupOpen } = mapState
+
   const [isOpen, setIsOpen] = useState(true)
 
   const [searchOpen, setSearchOpen] = useState(false)
@@ -48,7 +58,6 @@ const RightTopMenu: React.FC = () => {
   }, [searchOpen])
 
   const handleFindMeClick = () => {
-    console.log("Find Me")
     mapController.handleFindMe()
   }
 
@@ -67,25 +76,20 @@ const RightTopMenu: React.FC = () => {
     // mapController.handleDroneSpot
   }
   const handleInfoClick = () => {
-    console.log("info")
-    mapController.handleInfoModal((prevState: MapState) => !prevState.isPopupOpen)
+    mapController.handleInfoModal(!isPopupOpen)
   }
 
-
   const handleSearchClick = () => {
-    console.log("search")
     setSearchOpen(!searchOpen)
     // mapController.handleDroneSpot
   }
 
   const handleRadiusClick = () => {
-    console.log("radius")
     setRadiusOpen(!radiusOpen)
     mapController.handleRadiusUpdate(searchRadius)
   }
 
   const handleRadiusChange = (radius: number) => {
-    console.log("radius change")
     setSearchRadius(radius)
     mapController.handleRadiusUpdate(radius)
   }
@@ -97,10 +101,6 @@ const RightTopMenu: React.FC = () => {
       ) : (
         <IconButton icon={<ChevronDown size={40} color="#000" />} onClick={() => setIsOpen(!isOpen)} />
       )}
-
-      {/* <button onClick={() => setIsOpen(!isOpen)} css={toggleButton}>
-        {isOpen ? "Hide" : "Open"}
-      </button> */}
 
       {isOpen && (
         <div css={menuContent}>
@@ -119,15 +119,12 @@ const RightTopMenu: React.FC = () => {
               onClick={handleSearchClick}
             />
           </div>
+          <IconButton icon={<FindMeIcon size={40} color="#000" />} onClick={handleFindMeClick} />
+
           {/* <IconButton icon={<ParksVicIcon size={40} color="#000" />} onClick={handleParksVic} /> */}
           <IconButton icon={<CouncilsIcon size={40} color="#000" />} sticky={true} onClick={handleCouncilsClick} />
           <IconButton icon={<DroneSpotIcon size={40} color="#000" />} sticky={true} onClick={handleDroneSpotClick} />
-          <IconButton icon={<FindMeIcon size={40} color="#000" />} onClick={handleFindMeClick} />
 
-          {/* <div ref={radiusRef} css={searchContainer}>
-            <input type="text" css={[searchInput, radiusOpen && searchInputVisible]} placeholder="Radius..." />
-            <IconButton label={`${searchRadius} km`} onClick={handleRadius} />
-          </div> */}
           <div ref={radiusRef} css={inputContainer}>
             <select
               css={[dropdownInput, radiusOpen && radiusInputVisible]}
@@ -150,7 +147,13 @@ const RightTopMenu: React.FC = () => {
             />
           </div>
 
-          <IconButton icon={<InfoIcon size={40} color="#000" />} onClick={handleInfoClick} />
+          <IconButton
+            icon={<InfoIcon size={40} color="#000" />}
+            onClick={handleInfoClick}
+            css={isPopupOpen && css`
+              pointer-events: none;
+            `}
+          />
         </div>
       )}
     </div>

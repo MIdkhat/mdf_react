@@ -11,6 +11,7 @@ interface IconButtonProps {
   size?: number
   color?: string
   css?: any
+  disabled?: boolean
   sticky?: boolean
   active?: boolean
 }
@@ -23,6 +24,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   size = 40,
   color = "white",
   css,
+  disabled = false,
   sticky = false,
   active = false,
 }) => {
@@ -37,6 +39,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
     <button
       onClick={handleClick}
       className={className}
+      disabled={disabled}
       css={[
         buttonBaseStyle(size, isActive ? "yellow" : color), // Change color when active
         css,

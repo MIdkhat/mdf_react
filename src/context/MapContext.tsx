@@ -8,7 +8,7 @@ export type Layer = {
   type: "geojson"; // Type of layer (GeoJSON type in this case)
   source: {
     type: "geojson"; // Data source type
-    data: GeoJSON.FeatureCollection; // GeoJSON data (could contain Point, Polygon, etc.)
+    data: GeoJSON.Feature | GeoJSON.FeatureCollection; // GeoJSON data (could contain Point, Polygon, etc.)
   };
   paint?: maplibregl.FillLayerSpecification['paint'] | maplibregl.CircleLayerSpecification['paint']; // Optional paint styles
   visibility?: boolean; // Optional visibility toggle
@@ -25,6 +25,7 @@ export interface MapState {
   permissions: boolean;
   searchCenter: [number, number];
   searchRadius: number;
+  isPopupOpen: boolean;
 }
 
 // Define the full context type

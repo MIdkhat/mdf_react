@@ -1,69 +1,61 @@
 /** @jsxImportSource @emotion/react */
-import React, { useEffect } from "react"
-import { css } from '@emotion/react';
-import Modal from "react-modal"
+import React, { useEffect, useRef } from "react"
+import { css } from "@emotion/react"
 import { useMapState } from "../context/MapContext"
 import { InfoContent } from "../constants/InfoContent"
 
 const InfoModal: React.FC = () => {
-    const { mapState, mapController } = useMapState();
+  const { mapState, mapController } = useMapState()
+  const modalRef = useRef<HTMLDivElement>(null)
 
-    // Close the modal by calling the controller's method
-    const closeModal = () => {
-      mapController.handleInfoModal(false);
-    };
+  const closeModal = () => {
+    mapController.handleInfoModal(false)
+  }
 
-    useEffect(() => {
-      // Set up event listener for clicking outside the modal to close it
-      const handleClickOutside = (event: MouseEvent) => {
-        const modalElement = document.getElementById("info-modal");
-        if (modalElement && !modalElement.contains(event.target as Node)) {
-          closeModal();
-        }
-      };
+  // Close the modal if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        closeModal()
+      }
+    }
 
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, [mapState.isPopupOpen]);
+    document.addEventListener("mousedown", handleClickOutside)
 
-    if (!mapState.isPopupOpen) return null;
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
 
-    return (
-      <Modal
-        id="info-modal"
-        isOpen={mapState.isPopupOpen}
-        onRequestClose={closeModal}
-        ariaHideApp={false} // For accessibility
-        style={{
-          content: {
-            width: "600px", // Modal width
-            height: "auto",
-            maxWidth: "90%", // Responsive width
-            margin: "auto",
-            borderRadius: "12px", // Rounded corners
-            padding: "20px", // Padding inside the modal
-            backgroundColor: "#fff", // Background color
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)", // Shadow for a little lift effect
-            position: "relative", // Ensure the modal content can position the button
-            overflowY: "auto", // Scrollable content
-            maxHeight: "80vh", // Limit max height of the modal
-          },
-          overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.5)", // Overlay dark background
-          },
-        }}
-      >
-        <button onClick={closeModal} css={closeButtonStyle}>
-          X
-        </button>
-        <InfoContent />
-      </Modal>
-    );
-  };
+  if (!mapState.isPopupOpen) return null
+
+  return (
+    <div ref={modalRef} css={modalStyle}>
+      <button onClick={closeModal} css={closeButtonStyle}>
+        X
+      </button>
+      <InfoContent />
+    </div>
+  )
+}
 
 export default InfoModal
+
+const modalStyle = css`
+  width: 600px;
+  height: auto;
+  max-width: 90%;
+  margin-top: 3vh;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 12px;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow-y: auto;
+  max-height: 85vh;
+`;
 
 const closeButtonStyle = css`
   position: absolute;

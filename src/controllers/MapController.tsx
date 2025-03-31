@@ -2,24 +2,20 @@ import * as maplibregl from "maplibre-gl"
 import { MapState, useMapState } from "../context/MapContext"
 import { GeojsonLayer } from "../Layers/GeojsonLayer"
 import { createCirclePolygon } from "../utils"
+import { GeojsonData, fetchParks } from "../api-utilities/fetchParks"
 
 export class MapController {
   private setMapState: React.Dispatch<React.SetStateAction<MapState>>
   private mapRef: React.RefObject<maplibregl.Map | null>
   private mapState: MapState
-
   constructor(
     setMapState: React.Dispatch<React.SetStateAction<MapState>>,
     mapRef: React.RefObject<maplibregl.Map | null>,
-    mapState: MapState,
+    mapState: MapState
   ) {
     this.setMapState = setMapState
     this.mapRef = mapRef
     this.mapState = mapState
-  }
-
-  updateMapState = (newState: MapState) => {
-    this.mapState = newState;
   }
 
   get map(): maplibregl.Map | null {
@@ -53,9 +49,12 @@ export class MapController {
     }
   }
 
-  loadLayers = () => {
+  loadLayers = async () => {
     const map = this.map
     if (!map) return
+
+  await getParks(this.mapState.searchCenter, this.mapState.searchRadius); // Fetch and add geojson layer
+
 
     this.setMapState((prevState: MapState) => {
       prevState.layers.forEach((layer) => {
@@ -102,7 +101,6 @@ export class MapController {
   }
 
   flyTo = (center: [number, number], zoom: number, duration: number) => {
-    console.log("flyTo to:", center, "zoom:", zoom)
     if (this.mapRef.current) {
       this.mapRef.current.flyTo({
         center: center,
@@ -177,9 +175,46 @@ export class MapController {
   }
 
   handleInfoModal = (isPopupOpen: boolean) => {
-    this.setMapState((prevState: MapState) => ({
-      ...prevState,
-      isPopupOpen: isPopupOpen
-    }))
-  }
+    this.setMapState((prevState: MapState) => {
+      const newState = {
+        ...prevState,
+        isPopupOpen,
+      };
+      return newState;
+    });
+  };
 }
+
+// Separate function to fetch parks data
+const getParks = async (searchCenter: [number, number], radius: number) => {
+
+  const data: GeojsonData[] | null = await fetchParks(searchCenter, radius);
+  console.log('\n\ndata', data)
+  if (data) {
+    return processGeojsonData(data);
+  } else {
+    console.error('Failed to fetch geojson dataa ',data);
+    return null;
+  }
+};
+
+// Process the fetched geojson data if needed
+const processGeojsonData = (data: GeojsonData[]) => {
+  return {
+    type: 'FeatureCollection',
+    features: data.map((item) => ({
+      type: 'Feature',
+      geometry: {
+        type: 'Point', // Or adjust based on your data's geometry type
+        coordinates: [parseFloat(item.position.split(',')[1]), parseFloat(item.position.split(',')[0])],
+      },
+      properties: {
+        id: item.id,
+        name: item.name,
+        email: item.email,
+        fly: item.fly,
+        description: item.description,
+      },
+    })),
+  };
+};
