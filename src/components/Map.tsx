@@ -29,7 +29,7 @@ const Map: React.FC = () => {
     })
 
     map.on("click", (event) => {
-      console.log("Map clicked at:", event.lngLat)
+      // console.log("Map clicked at:", event.lngLat)
       mapController.handleMapClick(event.lngLat)
     })
 
